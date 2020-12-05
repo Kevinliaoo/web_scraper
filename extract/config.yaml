@@ -1,0 +1,13 @@
+countries_data: 
+  url: https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3
+  queries: 
+    countries_list: '.plainlist ul'
+
+economic_data: 
+  url: https://oec.world/en/profile/country
+  
+  queries: 
+
+    basic_data: '.cp-stat.cp-hero-stat'
+    basic_data_name_index: 1
+    basic_data_info_index: 4
