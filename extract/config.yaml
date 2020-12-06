@@ -11,3 +11,13 @@ economic_data:
     basic_data: '.cp-stat.cp-hero-stat'
     basic_data_name_index: 1
     basic_data_info_index: 4
+
+    economic_activity: '.cp-section-paragraph.cp-multi-column-section-paragraph'
+    overview_p: 0
+    trade_p: 1
+    destination_p: 2
+    location_p: 3
+    export_re: 'Trade: The top exports of .+? are '
+    import_re: '\. The top imports of .+? are '
+    exp_dest_re: 'Destinations: .+? exports mostly to '
+    imp_from_re: ', and imports mostly from '

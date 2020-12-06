@@ -1,5 +1,6 @@
 import requests 
 import bs4 
+import re
 
 from common import config 
 
@@ -51,3 +52,40 @@ class Country:
 			data[data_list[NAME_INDEX].text] = data_list[INFO_INDEX].text
 
 		return data
+
+	def _scrape_export_import(self, index, export_re, import_re): 
+		query = config()['economic_data']['queries']['economic_activity']
+		result = self._select(query)[index].text
+
+		export_statement = re.findall(r'{}'.format(export_re), result)[0]
+		import_statement = re.findall(r'{}'.format(import_re), result)[0]
+
+		export_start_index = result.find(export_statement)
+		import_start_index = result.find(import_statement)
+
+		export_goods = result[export_start_index+len(export_statement):import_start_index]
+		import_goods = result[import_start_index+len(import_statement):-1]
+
+		return {"Export": export_goods, "Import": import_goods}
+
+	@property 
+	def economic_activity(self): 
+		"""
+		Extract the main export and import industries of the country 
+		"""
+		index_ = int(config()['economic_data']['queries']['trade_p'])
+		export_re = config()['economic_data']['queries']['export_re']
+		import_re = config()['economic_data']['queries']['import_re']
+
+		return self._scrape_export_import(index_, export_re, import_re)
+
+	@property 
+	def trade_destination(self): 
+		"""
+		Extract the export and import trading partners
+		"""
+		index_ = int(config()['economic_data']['queries']['destination_p'])
+		export_re = config()['economic_data']['queries']['exp_dest_re']
+		import_re = config()['economic_data']['queries']['imp_from_re']
+
+		return self._scrape_export_import(index_, export_re, import_re)

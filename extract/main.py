@@ -4,6 +4,8 @@ import requests
 import bs4
 import os 
 import csv
+import re
+import json 
 
 import pandas as pd 
 import numpy as np
@@ -49,8 +51,25 @@ def _scrape_country_economic_activity(name, code):
 	host += '/{}'.format(code)
 	country = Country(name, code, host)
 
-	country.economic_activity;
+	datasets_path = '../datasets'
+	_save_json(country.economic_activity, datasets_path, "{}_econ_act.json".format(name))
+	_save_json(country.trade_destination, datasets_path, "{}_trade_dest.json".format(name))
 
+def _save_json(dict_, path, filename): 
+	"""
+	Saves a dictionary to a json file
+
+	:param dict_: Dictionary to be saved
+	:param path: Directory path to save the data
+	:param filename: File name
+	"""
+	cwd = os.getcwd() 
+	os.chdir(path) 
+
+	with open(filename, 'w') as f: 
+		json.dump(dict_, f, indent=4)
+
+	os.chdir(cwd)
 
 def _scrape_country_info(name, code): 
 	"""
@@ -203,5 +222,17 @@ if __name__ == '__main__':
 	)
 	
 	arguments = parser.parse_args() 
-	_scrape_country_info(arguments.country, getCountriesCode()[arguments.country])
-	_scrape_country_economic_activity(arguments.country, getCountriesCode()[arguments.country])
+	# Check if country is already screaped
+	is_checked = False
+	try: 
+		df = pd.read_csv('../datasets/Economic_data.csv')['Country'].values.tolist()
+		if arguments.country in df: 
+			logger.info('Information about {} is already available!'.format(arguments.country.capitalize()))
+			is_checked = True
+		else: is_checked = False
+	except: 
+		is_checked = False
+
+	if is_checked == False: 
+		_scrape_country_info(arguments.country, getCountriesCode()[arguments.country])
+		_scrape_country_economic_activity(arguments.country, getCountriesCode()[arguments.country])
