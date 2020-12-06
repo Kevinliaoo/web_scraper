@@ -33,12 +33,29 @@ def getCountriesCode():
 	list_ = dict() 
 	for index, value in config()['countries_data']['queries'].items(): 
 		for i in html.select(value)[0].findChildren('li'):
-			list_[i.findChild('a').text.lower()] = i.findChild('span').text.lower()
+			# Replace the space with a '_' in countries name with more than one word to form single-word names
+			if len(i.findChild('a').text.lower().split(' ')) > 1: 
+				country = '_'.join(i.findChild('a').text.lower().split(' ')) 
+				list_[country] = i.findChild('span').text.lower()
+			else: 
+				list_[i.findChild('a').text.lower()] = i.findChild('span').text.lower()
 
 	return list_
 
-def _scrape_country_info(name, code): 
+def _scrape_country_economic_activity(name, code): 
+	
+	logging.info("Scraping economic activity information about {}".format(name.capitalize()))
+	host = config()['economic_data']['url']
+	host += '/{}'.format(code)
+	country = Country(name, code, host)
 
+	country.economic_activity;
+
+
+def _scrape_country_info(name, code): 
+	"""
+	Get basic economic information about a country and store data in datasets/Economic_data.csv
+	"""
 	logging.info('Scraping information about {}'.format(name.capitalize()))
 
 	host = config()['economic_data']['url']
@@ -56,7 +73,7 @@ def _save_country_info(country, economic_data):
 	"""
 	global csv_headers
 
-	FILENAME = "Eonomic_data.csv"
+	FILENAME = "Economic_data.csv"
 	FILEDIR = '../datasets'
 	res = _check_file(FILEDIR, FILENAME)
 	
@@ -77,7 +94,6 @@ def _save_country_info(country, economic_data):
 		else: 
 			row.append(np.nan)
 	row.append(country.country_name)
-	print(row)
 	logging.info('Saving infromation to {}'.format(FILENAME))
 	with open('{}/{}'.format(FILEDIR, FILENAME), 'a') as f: 
 		writer = csv.writer(f)
@@ -159,6 +175,14 @@ def _set_csv_header(country='Argentina', code='arg'):
 	"""
 	global csv_headers
 
+	# Get directly from file if the file already exist
+	res = _check_file('../datasets', 'Economic_data.csv');
+	if res == 1:
+		with open('../datasets/Economic_data.csv', 'r') as f: 
+			csv_reader = csv.reader(f)
+			csv_headers = next(csv_reader)
+		return 
+
 	logging.info("Configuring CSV headers")
 
 	host = config()['economic_data']['url']
@@ -180,3 +204,4 @@ if __name__ == '__main__':
 	
 	arguments = parser.parse_args() 
 	_scrape_country_info(arguments.country, getCountriesCode()[arguments.country])
+	_scrape_country_economic_activity(arguments.country, getCountriesCode()[arguments.country])
