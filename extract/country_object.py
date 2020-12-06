@@ -49,7 +49,7 @@ class Country:
 
 		for econ_data in result: 
 			data_list = list(econ_data.find_all())
-			data[data_list[NAME_INDEX].text] = data_list[INFO_INDEX].text
+			data[Country._clean_parentesis(data_list[NAME_INDEX].text)] = data_list[INFO_INDEX].text
 
 		return data
 
@@ -89,3 +89,15 @@ class Country:
 		import_re = config()['economic_data']['queries']['imp_from_re']
 
 		return self._scrape_export_import(index_, export_re, import_re)
+
+	@staticmethod
+	def _clean_parentesis(string_): 
+		"""
+		Extract all thext before ()
+		"""
+		str_ = ""
+		for i in string_: 
+			if i != '(': 
+				str_ += i 
+			else: break
+		return str_

@@ -209,6 +209,7 @@ def _set_csv_header(country='Argentina', code='arg'):
 
 	country = Country(country, code, host)
 	csv_headers = list(country.economic_data.keys())
+	csv_headers = list(map(Country._clean_parentesis, csv_headers))
 	csv_headers.append("Country")
 
 if __name__ == '__main__':
