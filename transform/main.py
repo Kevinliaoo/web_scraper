@@ -4,12 +4,17 @@ import json
 import os 
 import re
 import csv
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 csv_headers_econ_act = ['Industry', 'Ammount', 'Trade']
 csv_headers_trading_dest = ['Destination', 'Ammount', 'Trade']
+
+DATASETS_DIR = '../datasets'
+ECON_DATA_NAME = "Economic_data.csv"
+ECON_DATA_FILE = DATASETS_DIR + "/" + ECON_DATA_NAME
 
 def _change_json_to_csv(country): 
 	"""
@@ -20,7 +25,7 @@ def _change_json_to_csv(country):
 
 	# Read json 
 	cwd = os.getcwd()
-	os.chdir('../datasets')
+	os.chdir(DATASETS_DIR)
 
 	econ_activity = _read_json('{}_econ_act.json'.format(country))
 	trade_countries = _read_json('{}_trade_dest.json'.format(country))
@@ -85,22 +90,6 @@ def _separate_fields(content):
 		finally: 
 			return c 
 
-	def _string_to_int(x): 
-		"""
-		Convert String to numerical value
-
-		:param x: String value of number ending with M, B or T
-		"""
-		last_letter = x[-1]
-		x = float(x[:-1])
-		if last_letter == 'M': 
-			ceros = 1e6
-		elif last_letter == 'B': 
-			ceros = 1e9
-		elif last_letter == 'T': 
-			ceros = 1e12
-		return x * ceros
-
 	ammount = r'\(\$.+?[MBT]{1,1}\),?'
 	value = r'[A-Z]{1,1}.+'
 	money = r'\d.+?[MBT]'
@@ -115,6 +104,28 @@ def _separate_fields(content):
 
 	return [ammount_list, content_list]
 
+def _string_to_int(x): 
+	"""
+	Convert String to numerical value
+
+	:param x: String value of number ending with M, B or T
+	"""
+	last_letter = x[-1]
+	num = float(x[:-1])
+	if last_letter == 'M': 
+		ceros = 1e6
+	elif last_letter == 'B': 
+		ceros = 1e9
+	elif last_letter == 'T': 
+		ceros = 1e12
+	elif last_letter == 'k': 
+		ceros = 1e3
+
+	try: 	
+		return num * ceros
+	except: 
+		return x
+
 def _read_json(filename):
 	"""
 	Return json file content 
@@ -127,6 +138,40 @@ def _read_json(filename):
 
 	return data
 
+def _fix_csv_data(country): 
+	"""
+	Fix data in Economic_data.csv file
+
+	:param country: Country name
+	"""
+	df = pd.read_csv(ECON_DATA_FILE)
+	mask = df['Country'] == country
+	country_df = df[mask]
+	country_df = country_df.apply(_money_to_float)
+	df[mask] = country_df
+
+	cwd = os.getcwd() 
+	os.chdir(DATASETS_DIR)
+
+	df.to_csv(ECON_DATA_NAME, index=False)
+
+	os.chdir(cwd)
+
+def _money_to_float(money):
+	"""
+	Convert money format value to float 
+
+	:param money: Content
+	"""
+	value = money.values[0] 
+	if type(value) == str: 
+		first = value[0]
+		if first == '$': 
+			# Convert money to float
+			value = value.replace("$", "").replace(",", ".")
+			return _string_to_int(value)
+	return money
+
 if __name__ == '__main__':
 	
 	parser = argparse.ArgumentParser()
@@ -137,3 +182,4 @@ if __name__ == '__main__':
 	arguments = parser.parse_args() 
 	
 	_change_json_to_csv(arguments.country)
+	_fix_csv_data(arguments.country)

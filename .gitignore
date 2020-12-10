@@ -3,3 +3,7 @@ venv/
 datasets/
 
 extract/__pycache__/
+
+transform/__pycache__/
+
+plot/__pycache__/
