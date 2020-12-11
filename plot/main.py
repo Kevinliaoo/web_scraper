@@ -34,7 +34,7 @@ def _bar_plot(df, category):
 	plt.title("{} vs {} {}".format(country_1, country_2, category))
 	plt.bar(
 		x = [country_1, country_2], 
-		height = [df[category].values[0], df[category].values[1]]
+		height = [df[category].values[0], df[category].values[1]], 
 	)
 	plt.xlabel("Country")
 	plt.ylabel(category)
@@ -74,13 +74,15 @@ def _plot_economic_activity(country1, country2):
 			x = trade_industries, 
 			height = [int(x) for (x, _) in trade_values], 
 			label = country1.capitalize(), 
-			color = "r"
+			color = "r", 
+			alpha = 0.4
 		)
 		plt.bar(
 			x = trade_industries, 
 			height = [int(x) for (_, x) in trade_values], 
 			label = country2.capitalize(), 
-			color = "b"
+			color = "b", 
+			alpha = .4
 		)
 		plt.legend()
 		plt.xticks(rotation=45)

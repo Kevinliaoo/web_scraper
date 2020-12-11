@@ -41,16 +41,11 @@ def _change_json_to_csv(country):
 
 	_write_csv(csv_headers_trading_dest[0], csv_headers_trading_dest[1], csv_headers_trading_dest[2], f'{country}_trade.csv', 'w+')
 
-
-	print("Archivo finalizadoooooo")
-
 	for key, val in trade_countries.items(): 
 
 		for i in range(0, len(val), 2):
 
 			_write_csv(val[i], _string_to_int(val[i+1]), key, f'{country}_trade.csv', 'a')
-	
-	print("AAAAAAAAAAAAAAAA")
 
 	os.chdir(cwd)
 
@@ -128,6 +123,21 @@ def _fix_csv_data(country):
 	df.to_csv(ECON_DATA_NAME, index=False)
 	os.chdir(cwd)
 
+def _money_to_float(money):
+	"""
+	Convert money format value to float 
+
+	:param money: Content
+	"""
+	value = money.values[0] 
+	if type(value) == str: 
+		first = value[0]
+		if first == '$': 
+			# Convert money to float
+			value = value.replace("$", "").replace(",", ".")
+			return _string_to_int(value)
+	return money
+
 if __name__ == '__main__':
 	
 	parser = argparse.ArgumentParser()
@@ -138,3 +148,4 @@ if __name__ == '__main__':
 	arguments = parser.parse_args() 
 	
 	_change_json_to_csv(arguments.country)
+	_fix_csv_data(arguments.country)
