@@ -2,6 +2,7 @@ import argparse
 import logging
 import pandas as pd 
 
+from difflib import SequenceMatcher
 from matplotlib import pyplot as plt
 
 logging.basicConfig(level=logging.INFO)
@@ -19,6 +20,7 @@ def _compare_countries(country1, country2):
 	_bar_plot(selected_countries[COMPARING_COLS], COMPARING_COLS[0])
 	_bar_plot(selected_countries[COMPARING_COLS], COMPARING_COLS[1])
 	_plot_economic_activity(country1, country2)
+	# _plot_trade(country1, country2)
 
 def _bar_plot(df, category):
 	"""
@@ -43,6 +45,14 @@ def _bar_plot(df, category):
 			s = "${:.2f}".format(df[category].values[i])
 		)
 	plt.show()
+
+def _plot_trade(country1, country2): 
+	country1_df = pd.read_csv(f"{DATA_DIR}/{country1}_trade.csv")
+	country2_df = pd.read_csv(f'{DATA_DIR}/{country2}_trade.csv')
+
+	for i in country1_df.Destination.values: 
+		print("Comparing {} with {}".format(i, country1))
+		print(SequenceMatcher(None, i, country1).ratio())
 
 def _plot_economic_activity(country1, country2): 
 	"""
