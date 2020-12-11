@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 
 csv_headers = None
 
+DATASETS_DIR = '../datasets'
+ECON_DATA_FILE = 'Economic_data.csv'
+ECON_DATA_PATH = DATASETS_DIR + '/' + ECON_DATA_FILE
+
 def getCountriesCode(): 
 	"""
 	Gets the ISO 3166-1 alpha-3 three-letters country code of each country
@@ -51,9 +55,8 @@ def _scrape_country_economic_activity(name, code):
 	host += '/{}'.format(code)
 	country = Country(name, code, host)
 
-	datasets_path = '../datasets'
-	_save_json(country.economic_activity, datasets_path, "{}_econ_act.json".format(name))
-	_save_json(country.trade_destination, datasets_path, "{}_trade_dest.json".format(name))
+	_save_json(country.economic_activity, DATASETS_DIR, "{}_econ_act.json".format(name))
+	_save_json(country.trade_destination, DATASETS_DIR, "{}_trade_dest.json".format(name))
 
 def _save_json(dict_, path, filename): 
 	"""
@@ -92,16 +95,14 @@ def _save_country_info(country, economic_data):
 	"""
 	global csv_headers
 
-	FILENAME = "Economic_data.csv"
-	FILEDIR = '../datasets'
-	res = _check_file(FILEDIR, FILENAME)
+	res = _check_file(DATASETS_DIR, ECON_DATA_FILE)
 	
 	if res == -1: 
 		_create_dir('../', 'datasets')
-		_create_dataset(FILEDIR, FILENAME)
+		_create_dataset(DATASETS_DIR, ECON_DATA_FILE)
 	elif res == 0: 
 		# Create the file 
-		_create_dataset(FILEDIR, FILENAME)
+		_create_dataset(DATASETS_DIR, ECON_DATA_FILE)
 
 	# Build row
 	row = [] 
@@ -113,8 +114,8 @@ def _save_country_info(country, economic_data):
 		else: 
 			row.append(np.nan)
 	row.append(country.country_name)
-	logging.info('Saving infromation to {}'.format(FILENAME))
-	with open('{}/{}'.format(FILEDIR, FILENAME), 'a') as f: 
+	logging.info('Saving infromation to {}'.format(ECON_DATA_FILE))
+	with open(ECON_DATA_PATH, 'a') as f: 
 		writer = csv.writer(f)
 		writer.writerow(row)
 
@@ -195,9 +196,9 @@ def _set_csv_header(country='Argentina', code='arg'):
 	global csv_headers
 
 	# Get directly from file if the file already exist
-	res = _check_file('../datasets', 'Economic_data.csv');
+	res = _check_file(DATASETS_DIR, ECON_DATA_FILE);
 	if res == 1:
-		with open('../datasets/Economic_data.csv', 'r') as f: 
+		with open(ECON_DATA_PATH, 'r') as f: 
 			csv_reader = csv.reader(f)
 			csv_headers = next(csv_reader)
 		return 
@@ -226,7 +227,7 @@ if __name__ == '__main__':
 	# Check if country is already screaped
 	is_checked = False
 	try: 
-		df = pd.read_csv('../datasets/Economic_data.csv')['Country'].values.tolist()
+		df = pd.read_csv(ECON_DATA_PATH)['Country'].values.tolist()
 		if arguments.country in df: 
 			logger.info('Information about {} is already available!'.format(arguments.country.capitalize()))
 			is_checked = True
