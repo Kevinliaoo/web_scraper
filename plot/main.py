@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 DATA_DIR = '../datasets'
 ECONOMIC_DATA_FILE = DATA_DIR + '/Economic_data.csv'
-COMPARING_COLS = ['GDP ', 'GDP PC ', 'Country']
+COMPARING_COLS = ['GDP', 'GDP PC', 'Country']
 
 def _compare_countries(country1, country2): 
 

@@ -24,6 +24,8 @@ def _ask_countries():
 	for country in selected_countries: 
 		_run_transform(country)
 
+	subprocess.run(['python', 'main.py', selected_countries[0], selected_countries[1]], cwd='./plot')
+
 def _run_extract(country):
 	"""
 	Runs main.py on extract to extract a country's economic data

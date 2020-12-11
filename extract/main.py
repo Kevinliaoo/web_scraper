@@ -226,6 +226,7 @@ if __name__ == '__main__':
 	arguments = parser.parse_args() 
 	# Check if country is already screaped
 	is_checked = False
+	
 	try: 
 		df = pd.read_csv(ECON_DATA_PATH)['Country'].values.tolist()
 		if arguments.country in df: 
